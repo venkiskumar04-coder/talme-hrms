@@ -627,6 +627,14 @@ small {
   letter-spacing: 0.08em;
 }
 
+.breakup-total-row td {
+  font-weight: 700;
+}
+
+.breakup-note {
+  margin-top: 16px;
+}
+
 .status {
   display: inline-flex;
   align-items: center;
