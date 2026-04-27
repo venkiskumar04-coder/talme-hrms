@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import {
   approveInvoiceAction,
@@ -13,6 +14,7 @@ import BarChart from "@/components/bar-chart";
 import CsvActions from "@/components/csv-actions";
 import FilterChips from "@/components/filter-chips";
 import Modal from "@/components/modal";
+import EmployeeCtcBreakdownPanel from "@/components/features/payroll/employee-ctc-breakdown-panel";
 import StatusBadge from "@/components/status-badge";
 import SuiteShell from "@/components/suite-shell";
 import PayrollOverview from "@/components/features/payroll/payroll-overview";
@@ -99,6 +101,7 @@ export default function PayrollPageClient() {
       }
     >
       <PayrollOverview />
+      <EmployeeCtcBreakdownPanel />
 
       <section className="page-section split-grid">
         <article className="panel">
@@ -207,6 +210,9 @@ export default function PayrollPageClient() {
                   </td>
                   <td>
                     <div className="row-actions">
+                      <Link className="mini-button" href={`/invoices/${invoice.id}`}>
+                        View
+                      </Link>
                       <button
                         className="mini-button"
                         onClick={() => {
