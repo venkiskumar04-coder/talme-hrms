@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function EmployeeAppLogin() {
   const router = useRouter();
@@ -12,6 +12,21 @@ export default function EmployeeAppLogin() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    window.history.pushState({ employeeLogin: true }, "", window.location.href);
+
+    function sendBackToHrms() {
+      router.replace("/");
+    }
+
+    window.addEventListener("popstate", sendBackToHrms);
+    return () => window.removeEventListener("popstate", sendBackToHrms);
+  }, [router]);
+
+  function goToHrms() {
+    router.replace("/");
+  }
 
   async function submit(event) {
     event.preventDefault();
@@ -48,11 +63,12 @@ export default function EmployeeAppLogin() {
         </div>
         <button
           className="employee-login-back"
-          onClick={() => router.replace("/")}
+          onClick={goToHrms}
           type="button"
           aria-label="Back to Talme HRMS"
         >
-          &lt;
+          <span>&lt;</span>
+          Talme HRMS
         </button>
         <div className="employee-login-hero">
           <div className="employee-login-logo">
