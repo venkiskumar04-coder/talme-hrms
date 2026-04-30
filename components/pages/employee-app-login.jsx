@@ -46,6 +46,14 @@ export default function EmployeeAppLogin() {
           <span>Vo WiFi</span>
           <span>29%</span>
         </div>
+        <button
+          className="employee-login-back"
+          onClick={() => router.replace("/")}
+          type="button"
+          aria-label="Back to Talme HRMS"
+        >
+          &lt;
+        </button>
         <div className="employee-login-hero">
           <div className="employee-login-logo">
             <img src="/talme-logo.png" alt="Talme Logo" />
