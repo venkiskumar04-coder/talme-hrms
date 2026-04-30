@@ -15,6 +15,7 @@ import BarChart from "@/components/bar-chart";
 import CsvActions from "@/components/csv-actions";
 import FilterChips from "@/components/filter-chips";
 import Modal from "@/components/modal";
+import EmployeeCtcBreakdownPanel from "@/components/features/payroll/employee-ctc-breakdown-panel";
 import StatusBadge from "@/components/status-badge";
 import SuiteShell from "@/components/suite-shell";
 import PayrollOverview from "@/components/features/payroll/payroll-overview";
@@ -117,6 +118,19 @@ export default function PayrollPageClient() {
       }
     >
       <PayrollOverview />
+      <EmployeeCtcBreakdownPanel />
+
+      {releaseSummary ? (
+        <section className="page-section panel">
+          <div className="signal-row">
+            <span className="teal">
+              {releaseSummary.sent} salary email{releaseSummary.sent === 1 ? "" : "s"} sent
+            </span>
+            <span>{releaseSummary.eligible} eligible employees</span>
+            <span>{releaseSummary.periodLabel}</span>
+          </div>
+        </section>
+      ) : null}
 
       {releaseSummary ? (
         <section className="page-section panel">
@@ -369,14 +383,14 @@ export default function PayrollPageClient() {
         <article className="panel">
           <div className="panel-head">
             <div>
-              <p className="eyebrow">Disbursement Controls</p>
-              <h3>Operational focus</h3>
+              <p className="eyebrow">Salary Payment</p>
+              <h3>Release readiness</h3>
             </div>
           </div>
-          <div className="signal-row">
-            <span className="teal">Salary release confidence strong</span>
-            <span className="gold">2 invoices need finance action</span>
-            <span>Statutory lock stable</span>
+          <div className="doc-stack">
+            <div className="doc-line"><span>Worker Bank Validation</span><strong>98.7%</strong></div>
+            <div className="doc-line"><span>Payment Advice</span><strong>Queued</strong></div>
+            <div className="doc-line"><span>Post-Payment Reconciliation</span><strong>Scheduled</strong></div>
           </div>
         </article>
       </section>
