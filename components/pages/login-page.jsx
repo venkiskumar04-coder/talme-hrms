@@ -12,6 +12,13 @@ const roleOptions = {
     password: "talme123",
     destination: "/dashboard"
   },
+  hr: {
+    label: "HR",
+    identifierLabel: "Corporate Email",
+    identifier: "hr@talme.ai",
+    password: "hr123",
+    destination: "/dashboard"
+  },
   employee: {
     label: "Employee",
     identifierLabel: "Employee ID",
@@ -93,6 +100,7 @@ export default function LoginPageClient() {
                   }}
                 >
                   <option value="admin">Enterprise Admin</option>
+                  <option value="hr">HR</option>
                   <option value="employee">Employee</option>
                 </select>
               </label>
