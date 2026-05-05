@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { navItems } from "@/lib/demo-data";
-import { canAccess } from "@/lib/permissions";
+import { canAccess, resolveRole } from "@/lib/permissions";
 
 export default function SuiteShell({
   eyebrow,
@@ -17,9 +17,12 @@ export default function SuiteShell({
   brandEyebrow = "Enterprise Suite"
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [focusMode, setFocusMode] = useState(false);
   const [lightMode, setLightMode] = useState(false);
   const { data: session, status } = useSession();
+  const role = resolveRole(session?.user?.role) || "Enterprise Admin";
+  const visibleNavItems = navItems.filter((item) => canAccess(role, item.href));
 
   useEffect(() => {
     const isFocus = window.localStorage.getItem("talme-focus-mode") === "on";
@@ -38,6 +41,19 @@ export default function SuiteShell({
     window.localStorage.setItem("talme-theme-mode", lightMode ? "light" : "dark");
   }, [lightMode]);
 
+  useEffect(() => {
+    if (pathname !== "/dashboard") return undefined;
+
+    window.history.pushState({ talmeDashboard: true }, "", window.location.href);
+
+    function sendBackToHrms() {
+      router.replace("/");
+    }
+
+    window.addEventListener("popstate", sendBackToHrms);
+    return () => window.removeEventListener("popstate", sendBackToHrms);
+  }, [pathname, router]);
+
   if (status === "loading") {
     return (
       <div className="app-loading">
@@ -53,7 +69,9 @@ export default function SuiteShell({
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand-block">
-          <div className="brand-mark">T</div>
+          <div className="brand-mark" style={{ background: 'transparent' }}>
+            <img src="/talme-logo.png" alt="Talme Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '12px' }} />
+          </div>
           <div>
             <p className="eyebrow">{brandEyebrow}</p>
             <h2>Talme</h2>
@@ -62,7 +80,7 @@ export default function SuiteShell({
 
         <div className="nav-group">
           <div className="nav-label">Core</div>
-          {navItems.filter((item) => canAccess(session?.user?.role, item.href)).map((item) => (
+          {visibleNavItems.map((item) => (
             <Link
               key={item.href}
               className={`nav-link ${pathname === item.href ? "active" : ""}`}
@@ -70,7 +88,10 @@ export default function SuiteShell({
             >
               <span>{item.index}</span>
               <div>
-                <strong>{item.label}</strong>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <strong>{item.label}</strong>
+                  {item.badge && <span className="nav-badge">{item.badge}</span>}
+                </div>
                 <small>{item.meta}</small>
               </div>
             </Link>
@@ -85,7 +106,7 @@ export default function SuiteShell({
             <h1>{title}</h1>
             {session?.user ? (
               <p className="session-note">
-                Signed in as <strong>{session.user.role}</strong> - {session.user.email}
+                Signed in as <strong>{role || session.user.role}</strong> - {session.user.email}
               </p>
             ) : null}
           </div>
@@ -108,14 +129,26 @@ export default function SuiteShell({
             {actions}
             <button
               className="ghost-button"
+              style={{ gap: '10px', padding: '6px 14px 6px 8px' }}
+              type="button"
+            >
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--panel-soft)', display: 'grid', placeItems: 'center', border: '1px solid var(--line)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+              <span style={{ fontSize: '0.9rem' }}>Talme Technologies Pvt Ltd</span>
+            </button>
+            <button
+              className="ghost-button"
               onClick={() => signOut({ callbackUrl: "/login" })}
               type="button"
             >
               Log Out
             </button>
-            <Link className="primary-button" href={primaryHref}>
-              {primaryLabel}
-            </Link>
+            {primaryHref && (
+              <Link className="primary-button" href={primaryHref}>
+                {primaryLabel}
+              </Link>
+            )}
           </div>
         </header>
 

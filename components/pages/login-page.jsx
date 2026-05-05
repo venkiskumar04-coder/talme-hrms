@@ -1,18 +1,48 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+
+const roleOptions = {
+  admin: {
+    label: "Enterprise Admin",
+    identifierLabel: "Corporate Email",
+    identifier: "director@talme.ai",
+    password: "talme123",
+    destination: "/dashboard"
+  },
+  hr: {
+    label: "HR",
+    identifierLabel: "Corporate Email",
+    identifier: "hr@talme.ai",
+    password: "hr123",
+    destination: "/dashboard"
+  },
+  employee: {
+    label: "Employee",
+    identifierLabel: "Employee ID",
+    identifier: "",
+    password: "",
+    destination: "/employee-app"
+  }
+};
 
 export default function LoginPageClient() {
   const router = useRouter();
   const [formState, setFormState] = useState({
-    email: "director@talme.ai",
-    password: "talme123",
-    role: "Enterprise Admin"
+    identifier: roleOptions.admin.identifier,
+    password: roleOptions.admin.password,
+    role: "admin"
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const selectedRole = roleOptions[formState.role];
+  const selectedCredentials = {
+    email: selectedRole.identifier,
+    password: selectedRole.password,
+    destination: selectedRole.destination
+  };
 
   return (
     <main className="landing-body">
@@ -32,9 +62,12 @@ export default function LoginPageClient() {
               setError("");
 
               try {
+                await signOut({ redirect: false });
+
                 const result = await signIn("credentials", {
-                  email: formState.email,
-                  password: formState.password,
+                  email: selectedCredentials.email,
+                  password: selectedCredentials.password,
+                  role: formState.role,
                   redirect: false
                 });
 
@@ -42,7 +75,8 @@ export default function LoginPageClient() {
                   throw new Error(result.error);
                 }
 
-                router.push("/dashboard");
+                router.push(selectedCredentials.destination);
+                router.refresh();
               } catch {
                 setError("Unable to sign in. Please retry.");
               } finally {
@@ -52,20 +86,30 @@ export default function LoginPageClient() {
           >
             <div className="landing-grid">
               <label>
-                <span>Corporate Email</span>
-                <input
-                  value={formState.email}
-                  onChange={(event) =>
-                    setFormState((current) => ({ ...current, email: event.target.value }))
-                  }
-                />
+                <span>Access Role</span>
+                <select
+                  value={formState.role}
+                  onChange={(event) => {
+                    const nextRole = event.target.value;
+                    const nextConfig = roleOptions[nextRole];
+                    setFormState({
+                      identifier: nextConfig.identifier,
+                      password: nextConfig.password,
+                      role: nextRole
+                    });
+                  }}
+                >
+                  <option value="admin">Enterprise Admin</option>
+                  <option value="hr">HR</option>
+                  <option value="employee">Employee</option>
+                </select>
               </label>
               <label>
-                <span>Access Role</span>
+                <span>{selectedRole.identifierLabel}</span>
                 <input
-                  value={formState.role}
+                  value={formState.identifier}
                   onChange={(event) =>
-                    setFormState((current) => ({ ...current, role: event.target.value }))
+                    setFormState((current) => ({ ...current, identifier: event.target.value }))
                   }
                 />
               </label>
@@ -82,34 +126,6 @@ export default function LoginPageClient() {
             </div>
 
             <div className="landing-actions">
-              <button
-                className="ghost-button"
-                onClick={async () => {
-                  setSubmitting(true);
-                  setError("");
-
-                  try {
-                    const result = await signIn("credentials", {
-                      email: "director@talme.ai",
-                      password: "talme123",
-                      redirect: false
-                    });
-
-                    if (result?.error) {
-                      throw new Error(result.error);
-                    }
-
-                    router.push("/dashboard");
-                  } catch {
-                    setError("Unable to open demo access. Please retry.");
-                  } finally {
-                    setSubmitting(false);
-                  }
-                }}
-                type="button"
-              >
-                Demo Access
-              </button>
               <button className="primary-button" disabled={submitting} type="submit">
                 {submitting ? "Signing In..." : "Enter Suite"}
               </button>

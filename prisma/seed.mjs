@@ -13,6 +13,7 @@ import {
 } from "../lib/demo-data.js";
 
 const prisma = new PrismaClient();
+const defaultAdminPassword = process.env.DEFAULT_ADMIN_PASSWORD || "talme123";
 
 const candidates = [
   ["Neha Sharma", "HRBP", "Final Interview", "Direct ATS", "Pending", "gold"],
@@ -38,13 +39,14 @@ async function main() {
     where: { email: "director@talme.ai" },
     update: {
       active: true,
-      role: "Enterprise Admin"
+      role: "Enterprise Admin",
+      passwordHash: await bcrypt.hash(defaultAdminPassword, 10)
     },
     create: {
       name: "Talme Director",
       email: "director@talme.ai",
       role: "Enterprise Admin",
-      passwordHash: await bcrypt.hash("talme123", 10)
+      passwordHash: await bcrypt.hash(defaultAdminPassword, 10)
     }
   });
 
@@ -87,11 +89,11 @@ async function main() {
     });
   }
 
-  if ((await prisma.leaveRequest.count()) === 0) {
+  if ((await prisma.leaveRequest.count()) === 0 && leaveSeed.length) {
     await prisma.leaveRequest.createMany({ data: leaveSeed });
   }
 
-  if ((await prisma.attendanceRecord.count()) === 0) {
+  if ((await prisma.attendanceRecord.count()) === 0 && attendanceSeed.length) {
     await prisma.attendanceRecord.createMany({ data: attendanceSeed });
   }
 
@@ -103,11 +105,11 @@ async function main() {
     });
   }
 
-  if ((await prisma.documentRecord.count()) === 0) {
+  if ((await prisma.documentRecord.count()) === 0 && documentSeed.length) {
     await prisma.documentRecord.createMany({ data: documentSeed });
   }
 
-  if ((await prisma.approvalItem.count()) === 0) {
+  if ((await prisma.approvalItem.count()) === 0 && approvalSeed.length) {
     await prisma.approvalItem.createMany({ data: approvalSeed });
   }
 
@@ -115,7 +117,7 @@ async function main() {
     await prisma.companySetting.createMany({ data: settingSeed });
   }
 
-  if ((await prisma.uploadedAsset.count()) === 0) {
+  if ((await prisma.uploadedAsset.count()) === 0 && uploadedAssetSeed.length) {
     await prisma.uploadedAsset.createMany({ data: uploadedAssetSeed });
   }
 
